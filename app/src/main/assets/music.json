@@ -1,0 +1,34 @@
+{
+  "music": [
+    {
+      "korSongName": "겁쟁이",
+      "engSongName": "coward",
+      "singer": "버즈",
+      "image": "https://image.bugsm.co.kr/album/images/200/80070/8007002.jpg"
+    },
+    {
+      "korSongName": "일기",
+      "engSongName": "diary",
+      "singer": "버즈",
+      "image": "https://image.bugsm.co.kr/album/images/200/80070/8007002.jpg"
+    },
+    {
+      "korSongName": "나에게로 떠나는 여행",
+      "engSongName": "journey_for_myself",
+      "singer": "버즈",
+      "image": "https://image.bugsm.co.kr/album/images/200/80070/8007002.jpg"
+    },
+    {
+      "korSongName": "가시",
+      "engSongName": "thorn",
+      "singer": "버즈",
+      "image": "https://image.bugsm.co.kr/album/images/200/80070/8007002.jpg"
+    },
+    {
+      "korSongName": "남자를 몰라",
+      "engSongName": "you_do_not_know_man",
+      "singer": "버즈",
+      "image": "https://image.bugsm.co.kr/album/images/200/80176/8017617.jpg"
+    }
+  ]
+}
