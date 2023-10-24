@@ -23,6 +23,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.simplemusicplayer.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
 import kotlin.properties.Delegates
 
 @UnstableApi
@@ -60,50 +61,37 @@ class MainActivity : AppCompatActivity() {
                             ) ?: return].singer,
                             text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
                                 position
-                            ) ?: return].korSongName
+                            ) ?: return].korSongName,
                         )
                         if (mService == null)
-                            binding.songTitleTextView.text = "현재 재생되고 있는 곡 = ${
-                                musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    position
-                                ) ?: return].korSongName
-                            }"
+                            binding.songTitleTextView.text = ""
                         else
                             binding.songTitleTextView.text = "현재 재생되고 있는 곡 = ${
                                 musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].korSongName
+                                    mService?.start!!
+                                )!!].korSongName
                             }"
                     }
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
-                        if (isPlaying) {
-                            mService?.startForeground(
-                                title = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    position
-                                ) ?: -1].singer,
-                                text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    position
-                                ) ?: -1].korSongName
-                            )
-                        }
-                        else{
-                            mService?.startForeground(
-                                title = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].singer,
-                                text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].korSongName
-                            )
-                        }
-                        if (mService?.state == State.STOP && !isPlaying) {
+                        mService?.startForeground(
+                            title = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
+                                mService?.start!!
+                            )!!].singer,
+                            text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
+                                mService?.start!!
+                            )!!].korSongName,
+                        )
+                        if (mService?.state == State.STOP ) {
                             binding.songTitleTextView.text = ""
                         }
                     }
                 })
-                mService?.startForeground(title = entity.singer, text = entity.korSongName)
+                mService?.startForeground(
+                    title = entity.singer,
+                    text = entity.korSongName,
+                )
                 startForegroundService(Intent(
                     applicationContext, MusicPlayerService::class.java
                 ).apply {
@@ -127,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                             ) ?: return].singer,
                             text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
                                 mService?.start ?: return
-                            ) ?: return].korSongName
+                            ) ?: return].korSongName,
                         )
                         binding.songTitleTextView.text = "현재 재생되고 있는 곡 = ${
                             musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
@@ -138,26 +126,15 @@ class MainActivity : AppCompatActivity() {
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         super.onIsPlayingChanged(isPlaying)
-                        if (isPlaying) {
-                            mService?.startForeground(
-                                title = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].singer,
-                                text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].korSongName
-                            )
-                        }else{
-                            mService?.startForeground(
-                                title = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].singer,
-                                text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
-                                    mService?.start ?: return
-                                ) ?: return].korSongName
-                            )
-                        }
-                        if (mService?.state == State.STOP && !isPlaying) {
+                        mService?.startForeground(
+                            title = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
+                                mService?.start ?: return
+                            ) ?: return].singer,
+                            text = musicList.music[mService?.exoPlayer?.currentMediaItemIndex?.plus(
+                                mService?.start ?: return
+                            ) ?: return].korSongName,
+                        )
+                        if (mService?.state == State.STOP ) {
                             binding.songTitleTextView.text = ""
                         }
                     }

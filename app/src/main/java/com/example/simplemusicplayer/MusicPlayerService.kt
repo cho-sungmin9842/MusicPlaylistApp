@@ -25,7 +25,7 @@ class MusicPlayerService : Service() {
         readData("music.json", MusicList::class.java) ?: MusicList(emptyList())
     }
     var start = -1
-    private lateinit var notification: Notification.Builder
+    lateinit var notification: Notification.Builder
 
     inner class MusicPlayerBinder : Binder() {
         fun getService(): MusicPlayerService {
@@ -40,42 +40,6 @@ class MusicPlayerService : Service() {
             exoPlayer?.volume = 1.0f   // 볼륨을 지정해줍니다.
         }
         startForegroundService()
-        exoPlayer?.addListener(object : Player.Listener {
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                super.onMediaItemTransition(mediaItem, reason)
-                startForeground(
-                    title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                        start
-                    ) ?: -1].singer,
-                    text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                        start
-                    ) ?: -1].korSongName
-                )
-            }
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                super.onIsPlayingChanged(isPlaying)
-                if (isPlaying) {
-                    startForeground(
-                        title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                            start
-                        ) ?: -1].singer,
-                        text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                            start
-                        ) ?: -1].korSongName
-                    )
-                } else {
-                    startForeground(
-                        title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                            start
-                        ) ?: -1].singer,
-                        text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                            start
-                        ) ?: -1].korSongName
-                    )
-                }
-            }
-        })
     }
 
     override fun onBind(intent: Intent?): IBinder {   // ❷ 바인더 반환
@@ -112,31 +76,20 @@ class MusicPlayerService : Service() {
                                 ) ?: -1].singer,
                                 text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
                                     start
-                                ) ?: -1].korSongName
+                                ) ?: -1].korSongName,
                             )
                         }
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             super.onIsPlayingChanged(isPlaying)
-                            if (isPlaying) {
-                                startForeground(
-                                    title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                                        start
-                                    ) ?: -1].singer,
-                                    text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                                        start
-                                    ) ?: -1].korSongName
-                                )
-                            } else {
-                                startForeground(
-                                    title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                                        start
-                                    ) ?: -1].singer,
-                                    text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
-                                        start
-                                    ) ?: -1].korSongName
-                                )
-                            }
+                            startForeground(
+                                title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
+                                    start
+                                )!!].singer,
+                                text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(
+                                    start
+                                )!!].korSongName,
+                            )
                         }
                     })
                 }
@@ -168,12 +121,6 @@ class MusicPlayerService : Service() {
                 if (exoPlayer?.hasPreviousMediaItem() == true) {
                     exoPlayer?.seekToPreviousMediaItem()
                     exoPlayer?.play()
-                    startForeground(
-                        title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(start)
-                            ?: -1].singer,
-                        text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(start)
-                            ?: -1].korSongName
-                    )
                 } else {
                     Toast.makeText(applicationContext, "이전 음악이 없습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -184,12 +131,6 @@ class MusicPlayerService : Service() {
                 if (exoPlayer?.hasNextMediaItem() == true) {
                     exoPlayer?.seekToNextMediaItem()
                     exoPlayer?.play()
-                    startForeground(
-                        title = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(start)
-                            ?: -1].singer,
-                        text = musicList.music[exoPlayer?.currentMediaItemIndex?.plus(start)
-                            ?: -1].korSongName
-                    )
                 } else {
                     Toast.makeText(applicationContext, "다음 음악이 없습니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -201,6 +142,8 @@ class MusicPlayerService : Service() {
     // ❶ 알림 채널 생성
     private fun startForegroundService() {
         // 재생,일시정지,정지 아이콘 생성
+        val playIcon =
+            Icon.createWithResource(baseContext, R.drawable.ic_baseline_play_arrow_24)
         val pauseIcon = Icon.createWithResource(baseContext, R.drawable.ic_baseline_pause_24)
         val closeIcon = Icon.createWithResource(baseContext, R.drawable.ic_baseline_close_24)
         val nextIcon = Icon.createWithResource(baseContext, R.drawable.ic_baseline_skip_next_24)
@@ -210,6 +153,11 @@ class MusicPlayerService : Service() {
             baseContext, 0, Intent(baseContext, MainActivity::class.java).apply {
                 action = MEDIA_PLAYER_MAIN
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP // 해당액티비티가 stack에 있으면 그것으로 대체함
+            }, PendingIntent.FLAG_IMMUTABLE    // 변하지 않음
+        )
+        val playPendingIntent = PendingIntent.getService(
+            baseContext, 0, Intent(baseContext, MusicPlayerService::class.java).apply {
+                action = MEDIA_PLAYER_PLAY
             }, PendingIntent.FLAG_IMMUTABLE    // 변하지 않음
         )
         val pausePendingIntent = PendingIntent.getService(
@@ -245,6 +193,7 @@ class MusicPlayerService : Service() {
             .setVisibility(Notification.VISIBILITY_PUBLIC)
             .addAction(Notification.Action.Builder(preIcon, "Pre", prePendingIntent).build())
             .addAction(Notification.Action.Builder(pauseIcon, "Pause", pausePendingIntent).build())
+            .addAction(Notification.Action.Builder(playIcon, "Play", playPendingIntent).build())
             .addAction(Notification.Action.Builder(nextIcon, "Next", nextPendingIntent).build())
             .addAction(Notification.Action.Builder(closeIcon, "Close", closePendingIntent).build())
             .setContentIntent(mainPendingIntent)    // 알림클릭시 mainPendingIntent로 이동
@@ -262,26 +211,6 @@ class MusicPlayerService : Service() {
         notification.setContentTitle(title)
         notification.setContentText(text)
         val notification = notification.build()
-        if (isPlaying()) {
-            val pauseIcon = Icon.createWithResource(baseContext, R.drawable.ic_baseline_pause_24)
-            val pausePendingIntent = PendingIntent.getService(
-                baseContext, 0, Intent(baseContext, MusicPlayerService::class.java).apply {
-                    action = MEDIA_PLAYER_PAUSE
-                }, PendingIntent.FLAG_IMMUTABLE    // 변하지 않음
-            )
-            notification.actions[1] =
-                Notification.Action.Builder(pauseIcon, "Pause", pausePendingIntent).build()
-        } else {
-            val playIcon =
-                Icon.createWithResource(baseContext, R.drawable.ic_baseline_play_arrow_24)
-            val playPendingIntent = PendingIntent.getService(
-                baseContext, 0, Intent(baseContext, MusicPlayerService::class.java).apply {
-                    action = MEDIA_PLAYER_PLAY
-                }, PendingIntent.FLAG_IMMUTABLE    // 변하지 않음
-            )
-            notification.actions[1] =
-                Notification.Action.Builder(playIcon, "Play", playPendingIntent).build()
-        }
         startForeground(1, notification)
     }
 
@@ -332,6 +261,7 @@ class MusicPlayerService : Service() {
         raw.forEachIndexed { index, field ->
             if (field.name == mediaEntity.engSongName) {
                 start = index
+
             }
         }
         for (count in start until raw.size) {
